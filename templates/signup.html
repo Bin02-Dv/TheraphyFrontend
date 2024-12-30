@@ -73,7 +73,7 @@
         <!-- <label for="">Role</label> -->
         <select name="role" id="" class="form-select" required>
           <option value="">--- Select Role ---</option>
-          <option value="patient">Patient</option>
+          <option value="user">Patient</option>
           <option value="therapist">Therapist</option>
         </select>
       </div>
@@ -121,7 +121,6 @@
                         green.append(response['message']);
                         loader.classList.add("loader-hidden");
                         if (response['therapist']){
-
                           window.location.href = response['redirect_url'];
                         }else{
                           window.location.href = '/';
