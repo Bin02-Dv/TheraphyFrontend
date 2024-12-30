@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'loader.css' %}">
+  <style>
+    .alert-danger{
+        background-color: rgba(254, 60, 86, 0.586);
+        padding: 20px;
+        margin-top: 10px;
+        text-align: center;
+        border-radius: 10px;
+        border: 2px solid red;
+        font-size: 20px;
+        color: rgb(64, 2, 2);
+        display: none;
+    }
+    
+    .alert-success{
+        background-color: rgba(6, 167, 94, 0.586);
+        padding: 20px;
+        margin-top: 10px;
+        text-align: center;
+        border-radius: 10px;
+        border: 2px solid rgba(2, 103, 58, 0.586);
+        font-size: 20px;
+        color: rgba(1, 36, 20, 0.758);
+        display: none;
+    }
+
+    .alert-danger.block {
+        display: block;
+    }
+
+    .alert-success.block {
+        display: block;
+    }
+</style>
+</head>
+<body>
+  <header class="header">
+    <button class="openbtn" onclick="openNav()"><i class="fa fa-bars"></i></button>
+  </header>
+  <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="/dash"><i class="fa fa-dashboard"></i>&nbsp;&nbsp;&nbsp; Dashboard</a>
+    {% if current_user.role == 'admin' %}
+    <a href="/index"><i class="fa-regular fa-user-circle"></i>&nbsp;&nbsp;&nbsp; Admin</a>
+    {% endif %}
+    {% if current_user.role == 'therapist' or current_user.role == 'user' %}
+    <a href="/payments"><i class="fa fa-dollar"></i>&nbsp;&nbsp;&nbsp; Payments</a>
+    <a href="#" class="active"><i class="fa fa-clock"></i>&nbsp;&nbsp;&nbsp; Session</a>
+    {% endif %}
+    {% if current_user.role == 'admin' %}
+    <a href="/client"><i class="fa-regular fa-user"></i>&nbsp;&nbsp;&nbsp; Client</a>
+    <a href="/therapist"><i class="fa fa-user"></i>&nbsp;&nbsp;&nbsp; Therapist</a>
+    {% endif %}
+    <a href="#" onclick="adminModal()"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;&nbsp; Logout</a>
+  </div>
+
+  <div class="container">
+    <div class="update">
+      <div class="update-content">
+        <span class="close-btn" id="close-modal-btn">&larr;;</span>
+        <h3>Update Session:</h3>
+        <form method="post" id="status_update">
+          {% csrf_token %}
+          <div class="form-group">
+            <div class="alert-danger"></div>
+            <div class="alert-success"></div>
+          </div>
+          <input type="hidden" id="status_id" value="{{id}}">
+          <label for="client-name">Update:</label>
+          <select name="status" id="status" class="form-select" required>
+            <option value="">--- Select Status ---</option>
+            <option value="approve">Approve</option>
+            <option value="reject">Reject</option>
+          </select><br>
+          <button class="btn btn-primary" onclick="openPay()">Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="sign-out-container">
+    <div class="signout-container" id="adminModalPlay">
+      <div class="signout-icon">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+      <h2>Sign Out</h2>
+      <p>Are you sure you want to sign out?</p>
+      <div>
+        <a href="/signout" class="btn btn-danger me-2">Sign Out</a>
+        <a href="" class="btn btn-secondary">Cancel</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="loader"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <script src="{% static 'js/loader.js' %}"></script>
+
+  <script>
+    function openNav() {
+      document.getElementById("mySidenav").style.width = "250px";
+      document.querySelector(".content").style.marginLeft = "250px";
+    }
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+      document.querySelector(".content").style.marginLeft = "0";
+    }
+
+    function adminModal() {
+      document.getElementById("adminModalPlay").style.display = 'block';
+    }
+  </script>
+    <script>
+        $(document).ready(function () {
+          $('#therapist-t').DataTable();
+        });
+      </script>
+    
+      <script src="{% static 'js/JQ.js' %}"></script>
+
+      <script>
+          // ajax
+          $(document).on('submit', '#status_update', function (e){
+              e.preventDefault();
+              var green = $(".alert-success");
+              var red = $(".alert-danger");
+              var status_id = $("#status_id").val();
+              var formData = new FormData(this);
+              var loader = document.querySelector(".loader");
+  
+              loader.classList.remove("loader-hidden");
+              $.ajax({
+                  type: 'POST',
+                  url: '/update/'+status_id,
+                  data: formData,
+                  processData: false, // Ensure data is not processed for FormData
+                  contentType: false, // Ensure proper content type for FormData
+                  success: function (response){
+                      var success = response['success'];
+                      if(success){
+                          // NORMAL ALERT warning, error, success
+                          red.removeClass("block");
+                          green.html('');
+                          green.addClass("block");
+                          green.append(response['message']);
+                          loader.classList.add("loader-hidden");
+                          window.location.href = '/session';
+                      }else{
+                          green.removeClass("block");
+                          red.html('');
+                          red.addClass("block");
+                          red.append(response['message']);
+                          loader.classList.add("loader-hidden");
+                      }
+  
+                      // const con = document.querySelector('.conn');
+                      // if (con) {
+                      //     con.scrollTo({ top: 0, behavior: 'smooth' });
+                      // }
+                  }
+              });
+          });
+      </script>
+</body>
+</html>

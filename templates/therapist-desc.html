@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Description</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <!-- --- local css --- -->
+   <link rel="stylesheet" href="{% static 'index.css' %}">
+   <link rel="stylesheet" href="{% static 'loader.css' %}">
+   <style>
+    .alert-danger{
+        background-color: rgba(254, 60, 86, 0.586);
+        padding: 20px;
+        margin-top: 10px;
+        text-align: center;
+        border-radius: 10px;
+        border: 2px solid red;
+        font-size: 20px;
+        color: rgb(64, 2, 2);
+        display: none;
+    }
+    
+    .alert-success{
+        background-color: rgba(6, 167, 94, 0.586);
+        padding: 20px;
+        margin-top: 10px;
+        text-align: center;
+        border-radius: 10px;
+        border: 2px solid rgba(2, 103, 58, 0.586);
+        font-size: 20px;
+        color: rgba(1, 36, 20, 0.758);
+        display: none;
+    }
+
+    .alert-danger.block {
+        display: block;
+    }
+
+    .alert-success.block {
+        display: block;
+    }
+</style>
+</head>
+<body>
+  <div class="form-container text-center">
+    <h4>Tell us more about yourself!</h4>
+    <br>
+    <form method="post" id="profile">
+      {% csrf_token %}
+      <div class="form-group">
+        <div class="alert-danger"></div>
+        <div class="alert-success"></div>
+      </div>
+      <input type="hidden" name="therapist_id" id="therapist_id"  class="form-control" value="{{id}}">
+        <div class="mb-3">
+            <!-- <input type="text" name="bio" class="form-control" placeholder="Enter your bio" required> -->
+            <textarea name="bio" id="" placeholder="Enter your bio" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <input type="text" name="specialization" class="form-control" placeholder="Specialization" required>
+        </div>
+        <div class="mb-3">
+            <input type="number" name="years_of_experience" class="form-control" placeholder="Years of experience" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </form>
+  </div>
+  <div class="loader"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/loader.js' %}"></script>
+
+  <script src="{% static 'js/JQ.js' %}"></script>
+
+    <script>
+        // ajax
+        $(document).on('submit', '#profile', function (e){
+            e.preventDefault();
+            var green = $(".alert-success");
+            var red = $(".alert-danger");
+            var therapist_id = $("#therapist_id").val();
+            var formData = new FormData(this);
+            var loader = document.querySelector(".loader");
+
+            loader.classList.remove("loader-hidden");
+            $.ajax({
+                type: 'POST',
+                url: '/therapist-desc/'+therapist_id,
+                data: formData,
+                processData: false, // Ensure data is not processed for FormData
+                contentType: false, // Ensure proper content type for FormData
+                success: function (response){
+                    var success = response['success'];
+                    if(success){
+                        // NORMAL ALERT warning, error, success
+                        red.removeClass("block");
+                        green.html('');
+                        green.addClass("block");
+                        green.append(response['message']);
+                        loader.classList.add("loader-hidden");
+                        window.location.href = '/';
+                    }else{
+                        green.removeClass("block");
+                        red.html('');
+                        red.addClass("block");
+                        red.append(response['message']);
+                        loader.classList.add("loader-hidden");
+                    }
+
+                    // const con = document.querySelector('.conn');
+                    // if (con) {
+                    //     con.scrollTo({ top: 0, behavior: 'smooth' });
+                    // }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

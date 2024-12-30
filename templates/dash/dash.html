@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'fontawesome-free/css/all.min.css' %}">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'modal.css' %}">
+</head>
+<body>
+  <header class="header">
+    <button class="openbtn" onclick="openNav()"><i class="fa fa-bars"></i></button>
+  </header>
+
+  <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="#" class="active"><i class="fa fa-dashboard"></i>&nbsp;&nbsp;&nbsp; Dashboard</a>
+    {% if current_user.role == 'admin' %}
+    <a href="/index"><i class="fa-regular fa-user-circle"></i>&nbsp;&nbsp;&nbsp; Admin</a>
+    {% endif %}
+    {% if current_user.role == 'therapist' or current_user.role == 'user' %}
+    <a href="/payments"><i class="fa fa-dollar"></i>&nbsp;&nbsp;&nbsp; Payments</a>
+    <a href="/session"><i class="fa fa-clock"></i>&nbsp;&nbsp;&nbsp; Session</a>
+    {% endif %}
+    {% if current_user.role == 'admin' %}
+    <a href="/client"><i class="fa-regular fa-user"></i>&nbsp;&nbsp;&nbsp; Client</a>
+    <a href="/therapist"><i class="fa fa-user"></i>&nbsp;&nbsp;&nbsp; Therapist</a>
+    {% endif %}
+    <a href="#" onclick="adminModal()"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;&nbsp; Logout</a>
+  </div>
+
+  <div class="content">
+    <div class="container">
+        <div id="admin" class="mb-5 cards">
+            {% comment %} <a href="">
+                <div class="container card p-5 w-50">
+                    <p>Client</p>
+                </div>
+            </a>
+            <br>
+            <a href="">
+                <div class="container card p-5 w-50">
+                    <p>Client</p>
+                </div>
+            </a> {% endcomment %}
+            <h1 class="d-flex justify-content-center align-items-center" style="height: 70vh;">Welcome back, {{current_user.full_name}}</h1>
+        </div>
+  </div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="close-modal-btn">&times;</span>
+      <h3>Add Client</h3>
+      <form>
+        <label for="client-name">Client Name:</label>
+        <input type="text" id="client-name" placeholder="Enter client name" required>
+        
+        <label for="client-email">Client Email:</label>
+        <input type="email" id="client-email" placeholder="Enter client email" required>
+        
+        <button type="submit" class="btn btn-submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <script src=""{% static 'js/modal.js' %}""></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script>
+    function openNav() {
+      document.getElementById("mySidenav").style.width = "250px";
+      document.querySelector(".content").style.marginLeft = "250px";
+    }
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+      document.querySelector(".content").style.marginLeft = "0";
+    }
+
+    function adminModal() {
+      document.getElementById("adminModalPlay").style.display = 'block';
+    }
+    
+    
+    const modal = document.getElementById("modal");
+    const openModalBtn = document.getElementById("open-modal-btn");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+
+    openModalBtn.addEventListener("click", () => {
+      modal.style.display = "flex";
+    });
+
+    closeModalBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+  </script>
+    <script>
+        $(document).ready(function () {
+          $('#admin1').DataTable();
+        });
+      </script>
+</body>
+</html>
